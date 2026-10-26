@@ -1,0 +1,8 @@
+[project]
+name = "exercise-mapping"
+version = "0.1.0"
+description = "Read mapping: suffix array, Burrows-Wheeler transform, FM-index, seed-and-extend"
+requires-python = ">=3.11"
+dependencies = [
+    "biopython>=1.88",
+]
