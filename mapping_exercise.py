@@ -79,6 +79,25 @@ def inverse_bwt(bwt):
     return result
 
 
+class FMIndex:
+    def __init__(self, text, s):
+        sa = suffix_array(text)
+        self.bwt = bwt(text, sa)
+        self.first_occurrence = first_occurrence(self.bwt)
+        self.counts = {key: [0] for key in ['A', 'C', 'G', 'T']}
+        for letter in self.bwt:
+            for key in self.counts:
+                self.counts[key].append(self.counts[key][-1])
+                if key == letter:
+                    self.counts[key][-1] += 1
+        self.sampled = {}
+        for row in range(len(sa)):
+            if (row % s) == 0:
+                self.sampled[row] = sa[row]
+        self.s = s
+
+
+
 if __name__ == "__main__":
     print(brute_force('AAAA', 'AA'))
     text = 'AAGGCGGCTTCA$'
@@ -90,3 +109,11 @@ if __name__ == "__main__":
     occurrence = first_occurrence(BWT1)
     print(occurrence)
     print(inverse_bwt(BWT1))
+
+    # --- backward search ---
+    print('--- backward search ---')
+    toy = FMIndex(text, 4)
+    print(toy.bwt)
+    print(toy.first_occurrence)
+    print(toy.counts)
+    print(toy.sampled)
