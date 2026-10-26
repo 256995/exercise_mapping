@@ -12,6 +12,7 @@ def suffix_array(text):
     for i in range(len(text)):
         SA.append([i, text[i:]])
     SA.sort(key=lambda x: x[1])
+    SA = [row[0] for row in SA]
     return SA
 
 
@@ -20,7 +21,8 @@ def find_block(text, sa, p):
     # binary search for low
     while hi > lo:
         mid = int(lo + (hi-1-lo)/2)
-        if sa[mid][1][:len(p)] < p:
+        idx = sa[mid]
+        if text[idx:idx+len(p)] < p:
             lo = mid + 1
         else:
             hi = mid
@@ -29,7 +31,8 @@ def find_block(text, sa, p):
     hi = len(sa)
     while hi > lo:
         mid = int(lo + (hi - 1 - lo) / 2)
-        if sa[mid][1][:len(p)] > p:
+        idx = sa[mid]
+        if text[idx:idx + len(p)] > p:
             hi = mid
         else:
             lo = mid + 1
@@ -37,9 +40,53 @@ def find_block(text, sa, p):
     return low, high
 
 
+def bwt(text, sa):
+    BWT_str = ''
+    for idx in sa:
+        BWT_str += text[idx-1]
+    return BWT_str
+
+
+def first_occurrence(letters):
+    sorted_list = [l for l in letters]
+    sorted_list.sort()
+    sorted = ''
+    for l in sorted_list:
+        sorted += l
+    keys = set(letters)
+    first_occ = {}
+    for key in keys:
+        idx = sorted.index(key)
+        first_occ[key] = idx
+    return first_occ
+
+
+def inverse_bwt(bwt):
+    first_occ = first_occurrence(bwt)
+    k = []
+    count = {key: 0 for key in first_occ.keys()}
+    for letter in bwt: # preparing the k
+        count[letter] += 1
+        k.append(count[letter])
+    result = ''
+    row = 0
+    step = 1 # counting steps
+    while step <= len(bwt):
+        x = bwt[row]
+        result += x
+        row = first_occ[x] + k[row] - 1
+        step += 1
+    return result
+
+
 if __name__ == "__main__":
     print(brute_force('AAAA', 'AA'))
-    SA = suffix_array('AAGGCGGCTTCA$')
-    print([row[0] for row in SA])
-    block_of_GGC = find_block('AAGGCGGCTTCA$', SA, 'GGC')
+    text = 'AAGGCGGCTTCA$'
+    SA = suffix_array(text)
+    print(SA)
+    block_of_GGC = find_block(text, SA, 'GGC')
     print(block_of_GGC)
+    BWT1 = bwt(text, SA)
+    occurrence = first_occurrence(BWT1)
+    print(occurrence)
+    print(inverse_bwt(BWT1))
